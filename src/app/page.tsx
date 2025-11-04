@@ -19,6 +19,9 @@ const formSchema = z.object({
 
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAmountSelection, setShowAmountSelection] = useState(false);
+  const [loanAmount, setLoanAmount] = useState(37500); // Default to middle value
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,8 +35,13 @@ export default function Home() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    setIsSubmitted(true);
-    // Here you would normally send the data to your backend
+    setIsLoading(true);
+    
+    // Simulate loading for 2-3 seconds
+    setTimeout(() => {
+      setIsLoading(false);
+      setShowAmountSelection(true);
+    }, 2500);
   }
 
   return (
@@ -55,24 +63,41 @@ export default function Home() {
 
       {/* Header */}
       <header className="relative z-10 px-6 lg:px-12 py-4 lg:py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Image
-            src="https://creditplan.it/wp-content/uploads/2023/02/LOGO-CREDITPLAN.png"
-            alt="Creditplan logo"
-            width={140}
-            height={48}
-            priority
-            className="w-auto h-8 lg:h-10 mt-4 lg:mt-0"
-          />
-          
-          <div className="flex items-center gap-4">
-            {/* Trust Badge - Richieste elaborate */}
-            <div className="inline-flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-blue-100 shadow-sm">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs lg:text-sm font-medium text-slate-700">
-                Richieste elaborate oggi: <span className="text-blue-600 font-bold">127</span>
-              </span>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col md:block">
+              <Image
+                src="https://creditplan.it/wp-content/uploads/2023/02/LOGO-CREDITPLAN.png"
+                alt="Creditplan logo"
+                width={280}
+                height={96}
+                quality={95}
+                priority
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-auto h-8 lg:h-10 mt-4 lg:mt-0 select-none"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
+              />
+              
+              {/* Trust Badge - Richieste elaborate - Mobile only, under logo */}
+              <div className="md:hidden mt-6 mb-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-blue-100 shadow-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-medium text-slate-700">
+                    Richieste elaborate oggi: <span className="text-blue-600 font-bold">127</span>
+                  </span>
+                </div>
+              </div>
             </div>
+          
+            <div className="flex items-center gap-4">
+              {/* Trust Badge - Richieste elaborate - Desktop only */}
+              <div className="hidden md:inline-flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-blue-100 shadow-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs lg:text-sm font-medium text-slate-700">
+                  Richieste elaborate oggi: <span className="text-blue-600 font-bold">127</span>
+                </span>
+              </div>
 
             {/* OAM Badge */}
             <a 
@@ -93,7 +118,10 @@ export default function Home() {
                     alt="Organismo Agenti e Mediatori"
                     width={44}
                     height={44}
-                    className="relative w-11 h-11 object-contain"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="relative w-11 h-11 object-contain select-none"
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
                   />
                 </div>
               </div>
@@ -104,12 +132,13 @@ export default function Home() {
                 </svg>
               </div>
             </a>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 px-6 lg:px-12 pt-4 lg:pt-8 pb-20">
+      <section className="relative z-10 px-6 lg:px-12 pt-0 lg:pt-8 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             
@@ -118,7 +147,7 @@ export default function Home() {
               
               {/* Main Headline */}
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-7xl font-black leading-[1.05] tracking-tight">
+                <h1 className="text-5xl lg:text-7xl font-bold lg:font-black leading-[1.05] tracking-tight">
                   <span className="block text-slate-900">
                     La tua cessione
                   </span>
@@ -220,7 +249,33 @@ export default function Home() {
                 <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500"></div>
                 
                 <CardHeader className="space-y-3 pb-6">
-                  {isSubmitted ? (
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <div className="relative w-20 h-20 mx-auto mb-6">
+                        {/* Outer spinning ring */}
+                        <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+                        {/* Inner spinning ring */}
+                        <div className="absolute inset-2 border-4 border-indigo-200 rounded-full"></div>
+                        <div className="absolute inset-2 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                        {/* Center dot */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                      <CardTitle className="text-2xl font-bold text-slate-900 mb-2">Caricamento...</CardTitle>
+                      <p className="text-slate-600">Stiamo elaborando la tua richiesta</p>
+                    </div>
+                  ) : showAmountSelection ? (
+                    <>
+                      <div className="text-center">
+                        <CardTitle className="text-2xl lg:text-3xl font-bold text-slate-900 mb-2">
+                          Quanto denaro vuoi prendere in prestito?
+                        </CardTitle>
+                        <p className="text-slate-600">Scegli l'importo desiderato</p>
+                      </div>
+                    </>
+                  ) : isSubmitted ? (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +303,57 @@ export default function Home() {
                   )}
                 </CardHeader>
 
-                {!isSubmitted && (
+                {showAmountSelection && (
+                  <CardContent className="pt-0 space-y-6">
+                    {/* Amount Display */}
+                    <div className="text-center py-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200">
+                      <div className="text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 mb-2">
+                        {loanAmount.toLocaleString('it-IT')} €
+                      </div>
+                      <div className="text-sm text-slate-600 font-medium">
+                        Importo selezionato
+                      </div>
+                    </div>
+
+                    {/* Slider */}
+                    <div className="space-y-4">
+                      <input
+                        type="range"
+                        min="1000"
+                        max="75000"
+                        step="1000"
+                        value={loanAmount}
+                        onChange={(e) => setLoanAmount(Number(e.target.value))}
+                        className="w-full h-3 bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-200 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) ${((loanAmount - 1000) / (75000 - 1000)) * 100}%, rgb(226, 232, 240) ${((loanAmount - 1000) / (75000 - 1000)) * 100}%, rgb(226, 232, 240) 100%)`
+                        }}
+                      />
+                      
+                      {/* Min/Max labels */}
+                      <div className="flex justify-between text-sm text-slate-500 font-medium">
+                        <span>1.000 €</span>
+                        <span>75.000 €</span>
+                      </div>
+                    </div>
+
+                    {/* Continue Button */}
+                    <Button 
+                      onClick={() => {
+                        setIsSubmitted(true);
+                        setShowAmountSelection(false);
+                      }}
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      Continua
+                      <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </Button>
+                  </CardContent>
+                )}
+
+                {!isSubmitted && !isLoading && !showAmountSelection && (
                   <CardContent className="pt-0">
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -436,26 +541,20 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Trust Image - Person Signing Contract */}
-          <div className="mb-12 max-w-3xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+          {/* Trust Image */}
+          <div className="max-w-3xl mx-auto">
+            <div className="relative">
               <Image
-                src="https://creditplan.it/wp-content/uploads/2023/03/03-BLOG-acquisto-23-1.jpg"
-                alt="Consulente professionale che assiste il cliente"
+                src="https://creditplan.it/wp-content/uploads/2025/11/Progetto-senza-titolo-3.png"
+                alt="Creditplan"
                 width={1200}
                 height={600}
-                className="w-full h-auto object-cover"
+                quality={95}
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-full h-auto object-cover select-none"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end">
-                <div className="p-8 text-white">
-                  <h3 className="text-2xl lg:text-3xl font-bold mb-2">
-                    Assistenza professionale garantita
-                  </h3>
-                  <p className="text-lg text-white/90">
-                    I nostri esperti ti guidano in ogni fase del processo
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -518,7 +617,10 @@ export default function Home() {
                   alt="Famiglia felice grazie a Creditplan"
                   width={800}
                   height={600}
-                  className="w-full h-auto object-cover"
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-full h-auto object-cover select-none"
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
                 />
               </div>
             </div>
@@ -580,9 +682,13 @@ export default function Home() {
               <Image
                 src="https://creditplan.it/wp-content/uploads/2023/02/LOGO-CREDITPLAN.png"
                 alt="Creditplan logo"
-                width={140}
-                height={48}
-                className="w-auto h-8"
+                width={280}
+                height={96}
+                quality={95}
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-auto h-8 select-none"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
               />
               <p className="text-sm text-slate-600">
                 © 2025 Creditplan. Tutti i diritti riservati.
@@ -606,6 +712,13 @@ export default function Home() {
                 Trasparenza
               </a>
             </div>
+          </div>
+          
+          {/* Designer Credit */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <p className="text-center text-sm text-slate-500">
+              Designed and developed by Matias Galliani :)
+            </p>
           </div>
         </div>
       </footer>
