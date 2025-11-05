@@ -3,6 +3,8 @@
 import { useState, memo, useCallback, useMemo, lazy, Suspense } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Chatbot } from "@/components/Chatbot";
 import dynamic from 'next/dynamic';
 
 // Lazy load heavy sections below the fold for faster initial load
@@ -14,43 +16,43 @@ const FormSection = dynamic(() => import('@/components/FormSection').then(mod =>
 const FAQ_ITEMS = [
   {
     question: "Cos'è la Cessione del Quinto?",
-    answer: "La Cessione del Quinto è un prestito personale che ti permette di ottenere fino a 75.000€ senza dover cambiare banca. Il rimborso avviene direttamente dalla busta paga, con trattenute automatiche pari a massimo un quinto dello stipendio netto."
+    answer: "La Cessione del Quinto è un prestito personale con una rata mensile che non supera il quinto (20%) del tuo stipendio netto o della tua pensione, trattenuta direttamente in busta paga o sulla pensione."
   },
   {
     question: "Quali sono i costi e le commissioni associate?",
-    answer: "Con Creditplan, l'istruttoria è completamente gratuita e non ci sono costi nascosti. Ti garantiamo massima trasparenza su tutti i costi del finanziamento fin dall'inizio, senza sorprese."
+    answer: "Le commissioni di mediazione sono regolamentate secondo la normativa vigente e vengono sempre comunicate in modo trasparente nel preventivo TAEG (Tasso Annuo Effettivo Globale). Il TAEG comprende tutti i costi, inclusi: spese di istruttoria, commissioni di mediazione, costi assicurativi obbligatori per legge e commissioni bancarie. Riceverai un preventivo personalizzato e dettagliato prima di qualsiasi impegno, in conformità con le normative di trasparenza bancaria."
   },
   {
     question: "Quanto tempo serve per ottenere il prestito?",
-    answer: "Dopo l'approvazione preliminare in sole 24 ore lavorative, il denaro viene erogato sul tuo conto corrente in massimo 48 ore operative. Il processo è completamente digitale e veloce."
+    answer: "Con Creditplan puoi ottenere la liquidità necessaria in pochi giorni grazie ai nostri partner bancari specializzati e al team qualificato."
   },
   {
     question: "Quali requisiti devo avere per richiedere la Cessione del Quinto?",
-    answer: "I requisiti principali sono: essere dipendente pubblico o privato con contratto a tempo indeterminato, avere un'età minima di 18 anni e massima che permetta di estinguere il prestito prima del pensionamento, e avere un reddito mensile sufficiente."
+    answer: "Puoi richiedere la Cessione del Quinto se sei un lavoratore dipendente (pubblico o privato) con contratto a tempo indeterminato o un pensionato. Non è richiesto alcun garante."
   },
   {
     question: "Esiste un limite massimo di età per la Cessione del Quinto?",
-    answer: "Non esiste un limite di età fisso, ma è necessario che tu possa estinguere il prestito prima di raggiungere l'età pensionabile. Il requisito principale è che il contratto di lavoro copra l'intera durata del prestito."
+    answer: "Sì, i pensionati possono ottenere il prestito fino a 89 anni alla scadenza del finanziamento."
   },
   {
     question: "Cosa succede se non raggiungo i requisiti per rinnovare una Cessione del Quinto già in corso?",
-    answer: "Se non soddisfi più i requisiti per il rinnovo, potrai comunque continuare a estinguere il prestito in corso secondo le condizioni già stabilite. Ti consigliamo di contattarci per valutare insieme le migliori opzioni disponibili."
+    answer: "In caso di mancato raggiungimento dei termini per il rinnovo, possiamo valutare insieme la Delegazione di Pagamento, una seconda trattenuta sullo stipendio che permette di ottenere ulteriore liquidità."
   },
   {
     question: "Perché dovrei scegliere Creditplan?",
-    answer: "Creditplan offre un servizio rapido, trasparente e completamente digitale. Con oltre 2.000 famiglie soddisfatte, garantiamo approvazione in 24 ore, erogazione in 48 ore, istruttoria gratuita e consulenza professionale in ogni fase del processo."
+    answer: "Offriamo tempi rapidi di erogazione. Collaboriamo con partner bancari convenzionati INPS, garantendo sicurezza e affidabilità. Abbiamo un team dedicato di professionisti a tua disposizione. Nessuna spesa aggiuntiva: la consulenza è gratuita. Tassi altamente competitivi."
   },
   {
     question: "Posso richiedere il prestito se sono stato segnalato come cattivo pagatore?",
-    answer: "Ogni caso viene valutato singolarmente. Anche se sei stato segnalato in CRIF o altri registri, possiamo aiutarti a trovare una soluzione. Contattaci per una consulenza gratuita e senza impegno."
+    answer: "Sì, la Cessione del Quinto è accessibile anche in caso di segnalazioni o protesti, in quanto non si basa sulla tua storia creditizia, ma sul tuo stipendio o pensione."
   },
   {
     question: "È possibile estinguere anticipatamente la Cessione del Quinto?",
-    answer: "Sì, è possibile estinguere anticipatamente il prestito. Ti consigliamo di contattarci per conoscere le condizioni specifiche e le eventuali penali di estinzione anticipata previste dal tuo contratto."
+    answer: "Sì, puoi estinguere anticipatamente il prestito in qualsiasi momento beneficiando della riduzione degli interessi residui."
   },
   {
     question: "Quanto costa la consulenza iniziale con Creditplan?",
-    answer: "La consulenza iniziale con Creditplan è completamente gratuita e senza impegno. I nostri esperti ti guideranno nella valutazione della tua situazione e ti aiuteranno a trovare la soluzione migliore per le tue esigenze."
+    answer: "Nessun costo accessorio."
   }
 ] as const;
 
@@ -72,14 +74,8 @@ const BENEFITS_DATA = [
   {
     icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
     color: "indigo",
-    title: "Senza cambio banca",
-    description: "Mantieni il tuo conto"
-  },
-  {
-    icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4",
-    color: "amber",
-    title: "Nessun vincolo",
-    description: "Flessibilità totale"
+    title: "Tasso fisso",
+    description: "Rata fissa e importo costante"
   }
 ] as const;
 
@@ -129,42 +125,78 @@ const FAQItem = memo(({
   isOpen: boolean; 
   onToggle: () => void;
 }) => (
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+  <div className={`group relative bg-white/90 backdrop-blur-sm rounded-2xl border transition-all duration-300 overflow-hidden ${
+    isOpen 
+      ? 'border-blue-200 shadow-lg shadow-blue-100/50' 
+      : 'border-slate-200 shadow-sm hover:border-blue-100 hover:shadow-md'
+  }`}>
+    {/* Gradient accent line - only visible when open */}
+    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 transition-opacity duration-300 ${
+      isOpen ? 'opacity-100' : 'opacity-0'
+    }`}></div>
+    
     <button
       onClick={onToggle}
-      className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 group"
+      className="w-full px-6 lg:px-8 py-6 text-left flex items-start justify-between gap-4 group"
     >
-      <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors pr-8">
-        {faq.question}
-      </h3>
-      <div className="flex-shrink-0">
-        <svg
-          className={`w-6 h-6 text-blue-600 transition-transform duration-300 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+      <div className="flex items-start gap-4 flex-1">
+        {/* Question number badge */}
+        <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+          isOpen 
+            ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md' 
+            : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'
+        }`}>
+          {index + 1}
+        </div>
+        
+        <h3 className={`text-base lg:text-lg font-bold transition-colors duration-300 ${
+          isOpen 
+            ? 'text-blue-600' 
+            : 'text-slate-900 group-hover:text-blue-600'
+        }`}>
+          {faq.question}
+        </h3>
+      </div>
+      
+      {/* Arrow icon */}
+      <div className="flex-shrink-0 mt-1">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
+          isOpen 
+            ? 'bg-blue-50 rotate-180' 
+            : 'bg-slate-50 group-hover:bg-blue-50'
+        }`}>
+          <svg
+            className={`w-5 h-5 transition-colors duration-300 ${
+              isOpen ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-600'
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
       </div>
     </button>
+    
+    {/* Answer section */}
     <div
       className={`overflow-hidden transition-all duration-300 ease-in-out ${
         isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
       }`}
     >
-      <div className="px-6 pb-5">
-        <div className="pt-2 border-t border-slate-100">
-          <p className="text-slate-600 leading-relaxed pt-4">
-            {faq.answer}
-          </p>
+      <div className="px-6 lg:px-8 pb-6">
+        <div className="pl-12 pr-4">
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-slate-600 leading-relaxed pt-4 text-[15px] lg:text-base">
+              {faq.answer}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -205,27 +237,9 @@ export default function Home() {
                 sizes="(max-width: 768px) 200px, 280px"
                 className="w-auto h-8 lg:h-10 mt-4 lg:mt-0"
               />
-              
-              {/* Trust Badge - Richieste elaborate - Mobile only, under logo */}
-              <div className="md:hidden mt-6 mb-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-blue-100 shadow-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs font-medium text-slate-700">
-                    Richieste elaborate oggi: <span className="text-blue-600 font-bold">127</span>
-                  </span>
-                </div>
-              </div>
             </div>
           
             <div className="flex items-center gap-4">
-              {/* Trust Badge - Richieste elaborate - Desktop only */}
-              <div className="hidden md:inline-flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 bg-white rounded-full border border-blue-100 shadow-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs lg:text-sm font-medium text-slate-700">
-                  Richieste elaborate oggi: <span className="text-blue-600 font-bold">127</span>
-                </span>
-              </div>
-
             {/* OAM Badge */}
             <a 
               href="https://www.organismo-am.it/b/0/06197620963/F311BEF5-24B7-4A32-AB79-567598386DBC/g.html"
@@ -272,17 +286,14 @@ export default function Home() {
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-7xl font-bold lg:font-black leading-[1.05] tracking-tight">
                   <span className="block text-slate-900">
-                    La tua cessione
+                    Ottieni fino a 75.000€
                   </span>
                   <span className="block text-slate-900">
-                    del quinto
-                  </span>
-                  <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent">
-                    in 48 ore
+                    con la cessione del quinto
                   </span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-slate-600 font-light max-w-xl leading-relaxed">
-                  Fino a <span className="font-bold text-slate-900">75.000€</span> senza cambio banca. Processo rapido, sicuro e completamente digitale.
+                  Istruttoria rapida ed approvazione entro 24/48 ore
                 </p>
               </div>
 
@@ -345,7 +356,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Benefit 1 - Fast Approval */}
             <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-blue-200">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
@@ -362,23 +373,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Benefit 2 - Comfort */}
-            <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-indigo-200">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">100% digitale</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Gestisci tutto comodamente da casa, dal tuo <span className="font-bold text-indigo-600">smartphone o PC</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Benefit 3 - Predictability */}
+            {/* Benefit 2 - Predictability */}
             <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-emerald-200">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
               <div className="relative">
@@ -461,7 +456,7 @@ export default function Home() {
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                   <span className="text-2xl font-bold text-white">2</span>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">Ricevi la chiamata</h3>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Ricevi la chiamata</h3>
                 <p className="text-slate-600 leading-relaxed">
                   Un nostro consulente esperto ti contatterà entro 2 ore per discutere la tua situazione.
                 </p>
@@ -557,18 +552,24 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative z-10 px-6 lg:px-12 py-20 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto">
+      <section className="relative z-10 px-6 lg:px-12 py-24 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLW9wYWNpdHk9Ii4wNSIvPjwvZz48L3N2Zz4=')] opacity-40"></div>
+        
+        <div className="relative max-w-5xl mx-auto">
+          {/* Header */}
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl lg:text-6xl font-bold text-slate-900 mb-4 tracking-tight">
               Domande Frequenti
             </h2>
-            <p className="text-xl text-slate-600">
-              Tutte le risposte alle domande più comuni
+            <p className="text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Tutto quello che devi sapere sulla Cessione del Quinto.
             </p>
           </div>
 
-          <div className="space-y-4">
+          {/* FAQ Grid */}
+          <div className="grid gap-4 lg:gap-5">
             {FAQ_ITEMS.map((faq, index) => (
               <FAQItem
                 key={index}
@@ -578,6 +579,34 @@ export default function Home() {
                 onToggle={() => handleFaqToggle(index)}
               />
             ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex flex-col items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-lg p-8 lg:p-10">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl lg:text-2xl font-bold text-slate-900 mb-2">
+                  Hai altre domande?
+                </h3>
+                <p className="text-slate-600 mb-6">
+                  I nostri consulenti sono pronti ad aiutarti. Nessun impegno, consulenza gratuita.
+                </p>
+                <Button 
+                  onClick={scrollToForm}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-12 px-8 text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  Richiedi una consulenza gratuita
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -600,7 +629,7 @@ export default function Home() {
                 style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
               />
               <p className="text-sm text-slate-600">
-                © 2025 Creditplan. Tutti i diritti riservati.
+                © 2025 Creditplan Italia Network di Mediazione Credizia. Tutti i diritti riservati.
               </p>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-600">
@@ -631,6 +660,36 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Chat Widget */}
+      <Dialog>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            onContextMenu={(e) => e.preventDefault()}
+            className="fixed bottom-6 right-4 z-50 flex items-center gap-5 rounded-3xl bg-white px-5 py-4 shadow-2xl border border-blue-100/60 backdrop-blur-md transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_24px_55px_-20px_rgba(37,99,235,0.55)]"
+            aria-label="Parla con un consulente"
+          >
+            <div className="flex flex-col text-left leading-tight">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Dubbi?</span>
+              <span className="text-base font-semibold text-slate-900">Parla con</span>
+            </div>
+            <Image
+              src="https://creditplan.it/wp-content/uploads/2025/10/Eugenio.svg"
+              alt="Eugenio, il tuo consulente Creditplan"
+              width={120}
+              height={48}
+              className="h-12 w-auto max-w-[140px] object-contain select-none"
+              draggable={false}
+              style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', pointerEvents: 'none' }}
+              priority
+            />
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl p-0 gap-0 border-0">
+          <Chatbot />
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
