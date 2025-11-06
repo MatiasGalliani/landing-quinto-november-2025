@@ -686,7 +686,7 @@ export default function Home() {
             />
           </button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl p-0 gap-0 border-0">
+        <DialogContent className="max-w-2xl p-0 gap-0 border-0 mx-4 sm:mx-auto">
           <Chatbot />
         </DialogContent>
       </Dialog>
