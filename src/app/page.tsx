@@ -771,7 +771,7 @@ export default function Home() {
           {/* Designer Credit */}
           <div className="mt-8 pt-6 border-t border-slate-200">
             <p className="text-center text-sm text-slate-500">
-              Designed and developed by Matias Galliani :)
+              Designed and developed by Matias Galliani
             </p>
           </div>
         </div>
