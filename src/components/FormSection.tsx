@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useFormState } from "@/hooks/useFormState";
 import { ProgressBar } from "./form/ProgressBar";
 import { PensionatoFlow } from "./form/PensionatoFlow";
@@ -25,6 +26,7 @@ const formSchema = z.object({
 
 export function FormSection() {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -138,6 +140,8 @@ export function FormSection() {
       
       setIsLoading(false);
       setIsSubmitted(true);
+      // Redirect to thank-you page
+      router.push("/grazie");
     } catch (error) {
       console.error('Error submitting form:', error);
       setIsLoading(false);
