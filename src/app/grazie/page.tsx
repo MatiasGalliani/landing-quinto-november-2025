@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GraziePage() {
   return (
-    <main className="min-h-[80vh] flex items-center justify-center px-4 py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+    <main className="min-h-[80vh] flex items-center justify-center px-4 py-16">
       {/* Google Ads Conversion Event */}
       <Script id="gtag-conversion-grazie" strategy="afterInteractive">
         {`
