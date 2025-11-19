@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { NumberInput } from "./NumberInput";
 import { NavigationButtons } from "./NavigationButtons";
 import { SelectInput } from "./SelectInput";
+import { SliderInput } from "./SliderInput";
+import { ContactInfoFields } from "./ContactInfoFields";
 import {
   PensionatoData,
   ENTI_PENSIONISTICI,
@@ -88,12 +90,14 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
     <>
       {data.step === 1 && (
         <div className="space-y-4">
-          <NumberInput
-            value={data.amount}
+          <SliderInput
+            value={data.amount || 20000}
             onChange={(amount) => updateField({ amount })}
             label="Di quanto hai bisogno?"
             subtitle="Importo richiesto"
-            placeholder="Es. 25000"
+            min={2000}
+            max={80000}
+            step={500}
           />
           {data.error && <p className="text-sm text-red-600">{data.error}</p>}
           <NavigationButtons onBack={handleStepBack} onNext={handleAmountNext} />
@@ -102,12 +106,14 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
 
       {data.step === 2 && (
         <div className="space-y-4">
-          <NumberInput
-            value={data.pension}
+          <SliderInput
+            value={data.pension || 1200}
             onChange={(pension) => updateField({ pension })}
             label="Qual è la tua pensione netta mensile?"
             subtitle="Pensione mensile netta"
-            placeholder="Es. 1200"
+            min={700}
+            max={5000}
+            step={50}
           />
           {data.error && <p className="text-sm text-red-600">{data.error}</p>}
           <NavigationButtons onBack={handleStepBack} onNext={handlePensionNext} />
@@ -142,6 +148,7 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
 
       {data.step === 5 && (
         <div className="space-y-4">
+          <ContactInfoFields />
           <div className="text-center py-4 bg-green-50 rounded-xl border border-green-200">
             <p className="text-sm text-green-700 font-medium">
               Tutti i dati sono stati inseriti. Clicca su "Invia richiesta" per completare.

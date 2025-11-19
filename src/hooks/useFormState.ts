@@ -30,7 +30,7 @@ interface UseFormStateReturn {
 }
 
 export function useFormState(form: UseFormReturn<any>): UseFormStateReturn {
-  const [showPersonalInfo, setShowPersonalInfo] = useState(true);
+  const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [userPosition, setUserPosition] = useState<UserPosition>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,18 +39,18 @@ export function useFormState(form: UseFormReturn<any>): UseFormStateReturn {
   const [dipendente, setDipendente] = useState<DipendenteData>(INITIAL_DIPENDENTE_STATE);
 
   const getCurrentStep = useCallback(() => {
-    if (showPersonalInfo) return 1;
-    if (!userPosition) return 2;
+    if (!userPosition) return 1;
     if (userPosition === "PENSIONATO") {
-      return 2 + pensionato.step;
+      return 1 + pensionato.step;
     } else {
-      return 2 + dipendente.step;
+      return 1 + dipendente.step;
     }
-  }, [showPersonalInfo, userPosition, pensionato.step, dipendente.step]);
+  }, [userPosition, pensionato.step, dipendente.step]);
 
   const getTotalSteps = useCallback(() => {
-    if (!userPosition) return 2;
-    return userPosition === "PENSIONATO" ? 7 : 10;
+    if (!userPosition) return 1;
+    // Position selection (1) + flow steps
+    return userPosition === "PENSIONATO" ? 6 : 9;
   }, [userPosition]);
 
   const calculateProgress = useCallback(() => {
@@ -60,7 +60,7 @@ export function useFormState(form: UseFormReturn<any>): UseFormStateReturn {
   }, [getCurrentStep, getTotalSteps]);
 
   const resetForm = useCallback(() => {
-    setShowPersonalInfo(true);
+    setShowPersonalInfo(false);
     setUserPosition(null);
     setIsSubmitted(false);
     setIsLoading(false);

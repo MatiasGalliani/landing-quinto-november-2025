@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { NumberInput } from "./NumberInput";
 import { NavigationButtons } from "./NavigationButtons";
 import { SelectInput } from "./SelectInput";
+import { SliderInput } from "./SliderInput";
+import { ContactInfoFields } from "./ContactInfoFields";
 import {
   DipendenteData,
   TIPOLOGIE_DIPENDENTE,
@@ -141,12 +143,14 @@ export function DipendenteFlow({ data, onUpdate, onBack, onSubmit }: DipendenteF
     <>
       {data.step === 1 && (
         <div className="space-y-4">
-          <NumberInput
-            value={data.amount}
+          <SliderInput
+            value={data.amount || 30000}
             onChange={(amount) => updateField({ amount })}
             label="Di quanto hai bisogno?"
             subtitle="Importo richiesto"
-            placeholder="Es. 30000"
+            min={2000}
+            max={80000}
+            step={500}
           />
           {data.error && <p className="text-sm text-red-600">{data.error}</p>}
           <NavigationButtons onBack={handleStepBack} onNext={handleAmountNext} />
@@ -155,12 +159,14 @@ export function DipendenteFlow({ data, onUpdate, onBack, onSubmit }: DipendenteF
 
       {data.step === 2 && (
         <div className="space-y-4">
-          <NumberInput
-            value={data.salary}
+          <SliderInput
+            value={data.salary || 1800}
             onChange={(salary) => updateField({ salary })}
             label="Qual è il tuo stipendio netto mensile?"
             subtitle="Stipendio netto mensile"
-            placeholder="Es. 1800"
+            min={700}
+            max={7000}
+            step={50}
           />
           {data.error && <p className="text-sm text-red-600">{data.error}</p>}
           <NavigationButtons onBack={handleStepBack} onNext={handleSalaryNext} />
@@ -247,6 +253,7 @@ export function DipendenteFlow({ data, onUpdate, onBack, onSubmit }: DipendenteF
 
       {((data.step === 7 && data.tipo === "PUBBLICO/STATALE") || (data.step === 8 && data.tipo !== "PUBBLICO/STATALE")) && (
         <div className="space-y-4">
+          <ContactInfoFields />
           <div className="text-center py-4 bg-green-50 rounded-xl border border-green-200">
             <p className="text-sm text-green-700 font-medium">
               Tutti i dati sono stati inseriti. Clicca su "Invia richiesta" per completare.
