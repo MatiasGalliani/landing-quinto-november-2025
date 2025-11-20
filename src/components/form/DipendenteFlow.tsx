@@ -34,6 +34,13 @@ export function DipendenteFlow({ data, onUpdate, onBack, onSubmit }: DipendenteF
   const handleContactNext = () => {
     clearError();
     updateField({ step: 2 });
+    // Scroll to top of form section
+    const formSection = document.getElementById('form-section');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Step 2: Tipo dipendente
