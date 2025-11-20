@@ -787,28 +787,14 @@ export default function Home() {
                   </span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-slate-600 font-light max-w-xl leading-relaxed" itemProp="description">
-                  Istruttoria rapida ed approvazione entro 24/48 ore
+                  Calcola il tuo preventivo in 30 secondi. Zero impegno, 100% online.
                 </p>
               </header>
 
-              {/* Benefits */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                {BENEFITS_DATA.map((benefit, idx) => (
-                  <BenefitCard
-                    key={idx}
-                    icon={benefit.icon}
-                    color={benefit.color}
-                    title={benefit.title}
-                    description={benefit.description}
-                    onClick={() => handleBenefitClick(idx)}
-                  />
-                ))}
-              </div>
-
-              {/* Google Reviews Social Proof */}
+              {/* Google Reviews Social Proof - Solo visible en móvil, oculto en desktop donde se muestra debajo del formulario */}
               <button
                 onClick={handleOpenReviewsModal}
-                className="inline-flex items-center gap-4 pt-4 bg-white px-5 py-3.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 cursor-pointer text-left w-full"
+                className="lg:hidden inline-flex items-center gap-4 pt-4 bg-white px-5 py-3.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
@@ -836,8 +822,40 @@ export default function Home() {
               </button>
             </article>
 
-            {/* Right: Form Card */}
-            <FormSection />
+            {/* Right: Form Card + Social Proof */}
+            <div className="space-y-6">
+              <FormSection />
+              
+              {/* Google Reviews Social Proof - Debajo del formulario (solo desktop) */}
+              <button
+                onClick={handleOpenReviewsModal}
+                className="hidden lg:inline-flex items-center gap-4 bg-white px-5 py-3.5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <path d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" fill="#FFC107"/>
+                    <path d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" fill="#FF3D00"/>
+                    <path d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0124 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" fill="#4CAF50"/>
+                    <path d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 01-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" fill="#1976D2"/>
+                  </svg>
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      {STAR_RATINGS.map((i) => (
+                        <svg key={i} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-sm text-slate-600 font-medium leading-tight">
+                      <span className="font-bold text-slate-900">4.9/5</span> su Google
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Oltre 2.000 recensioni verificate
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -853,6 +871,37 @@ export default function Home() {
               Semplifichiamo ogni aspetto del tuo finanziamento
             </p>
           </header>
+
+          {/* 3 Benefit Cards originales de Hero movidas aquí */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {BENEFITS_DATA.map((benefit, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleBenefitClick(idx)}
+                className="flex flex-col items-start gap-3 p-6 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg cursor-pointer text-left w-full"
+              >
+                <div className={`flex-shrink-0 w-12 h-12 ${
+                  benefit.color === 'blue' ? 'bg-blue-100' : 
+                  benefit.color === 'green' ? 'bg-green-100' : 
+                  benefit.color === 'indigo' ? 'bg-indigo-100' : 
+                  'bg-amber-100'
+                } rounded-xl flex items-center justify-center`}>
+                  <svg className={`w-6 h-6 ${
+                    benefit.color === 'blue' ? 'text-blue-600' : 
+                    benefit.color === 'green' ? 'text-green-600' : 
+                    benefit.color === 'indigo' ? 'text-indigo-600' : 
+                    'text-amber-600'
+                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={benefit.icon} />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-slate-600">{benefit.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {WHY_CHOOSE_BENEFITS_DATA.map((benefit, idx) => (

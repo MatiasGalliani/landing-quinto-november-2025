@@ -30,26 +30,13 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
 
   const clearError = () => updateField({ error: "" });
 
-  const handleAmountNext = () => {
-    if (!data.amount || data.amount <= 0) {
-      updateField({ error: "Inserisci un importo valido" });
-      return;
-    }
+  // Step 1: Contact Info
+  const handleContactNext = () => {
     clearError();
     updateField({ step: 2 });
   };
 
-  const handlePensionNext = () => {
-    if (!data.pension || data.pension < 660) {
-      updateField({
-        error: "Non è possibile procedere perché l'importo della pensione è al di sotto del minimo richiesto",
-      });
-      return;
-    }
-    clearError();
-    updateField({ step: 3 });
-  };
-
+  // Step 2: Tipología de pensión
   const handleTipoNext = () => {
     if (!data.tipo) {
       updateField({ error: "Seleziona una tipologia di pensione" });
@@ -62,20 +49,17 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
       return;
     }
     clearError();
-    updateField({ step: 4 });
+    updateField({ step: 3 });
   };
 
+  // Step 3: Ente pensionístico (Final)
   const handleEnteNext = () => {
     if (!data.ente) {
       updateField({ error: "Seleziona un ente pensionistico" });
       return;
     }
-    if (data.ente === "PENSIONATO ITALIANO RESIDENTE ESTERO") {
-      updateField({ step: 5, error: "" });
-      return;
-    }
     clearError();
-    updateField({ step: 5 });
+    onSubmit();
   };
 
   const handleStepBack = () => {
@@ -88,39 +72,22 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
 
   return (
     <>
+      {/* Step 1: Información de contacto */}
       {data.step === 1 && (
         <div className="space-y-4">
-          <SliderInput
-            value={data.amount || 20000}
-            onChange={(amount) => updateField({ amount })}
-            label="Di quanto hai bisogno?"
-            subtitle="Importo richiesto"
-            min={2000}
-            max={80000}
-            step={500}
-          />
+          <ContactInfoFields />
+          <div className="text-center py-3 bg-blue-50 rounded-xl border border-blue-200">
+            <p className="text-sm text-blue-700 font-medium">
+              Solo alcuni passaggi finali per completare la tua richiesta
+            </p>
+          </div>
           {data.error && <p className="text-sm text-red-600">{data.error}</p>}
-          <NavigationButtons onBack={handleStepBack} onNext={handleAmountNext} />
+          <NavigationButtons onBack={handleStepBack} onNext={handleContactNext} />
         </div>
       )}
 
+      {/* Step 2: Tipología de pensión */}
       {data.step === 2 && (
-        <div className="space-y-4">
-          <SliderInput
-            value={data.pension || 1200}
-            onChange={(pension) => updateField({ pension })}
-            label="Qual è la tua pensione netta mensile?"
-            subtitle="Pensione mensile netta"
-            min={700}
-            max={5000}
-            step={50}
-          />
-          {data.error && <p className="text-sm text-red-600">{data.error}</p>}
-          <NavigationButtons onBack={handleStepBack} onNext={handlePensionNext} />
-        </div>
-      )}
-
-      {data.step === 3 && (
         <div className="space-y-4">
           <SelectInput
             label="Tipologia pensione"
@@ -133,7 +100,8 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
         </div>
       )}
 
-      {data.step === 4 && (
+      {/* Step 3: Ente pensionístico (Final) */}
+      {data.step === 3 && (
         <div className="space-y-4">
           <SelectInput
             label="Ente pensionistico"
@@ -141,19 +109,12 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
             onChange={(ente) => updateField({ ente })}
             options={ENTI_PENSIONISTICI}
           />
-          {data.error && <p className="text-sm text-red-600">{data.error}</p>}
-          <NavigationButtons onBack={handleStepBack} onNext={handleEnteNext} />
-        </div>
-      )}
-
-      {data.step === 5 && (
-        <div className="space-y-4">
-          <ContactInfoFields />
           <div className="text-center py-4 bg-green-50 rounded-xl border border-green-200">
             <p className="text-sm text-green-700 font-medium">
               Tutti i dati sono stati inseriti. Clicca su "Invia richiesta" per completare.
             </p>
           </div>
+          {data.error && <p className="text-sm text-red-600">{data.error}</p>}
           
           {/* Privacy Acceptance */}
           <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
@@ -194,7 +155,7 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
               Indietro
             </Button>
             <Button
-              onClick={onSubmit}
+              onClick={handleEnteNext}
               disabled={!privacyAccepted}
               className="flex-1 h-12 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
@@ -206,4 +167,5 @@ export function PensionatoFlow({ data, onUpdate, onBack, onSubmit }: PensionatoF
     </>
   );
 }
+
 

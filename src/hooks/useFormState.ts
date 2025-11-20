@@ -39,17 +39,20 @@ export function useFormState(form: UseFormReturn<any>): UseFormStateReturn {
   const [dipendente, setDipendente] = useState<DipendenteData>(INITIAL_DIPENDENTE_STATE);
 
   const getCurrentStep = useCallback(() => {
-    if (!userPosition) return 1;
+    if (!userPosition) return 1; // Will be overridden by initialStep in FormSection
+    // After position selection, add 3 to the internal step (3 initial steps + current step)
     if (userPosition === "PENSIONATO") {
-      return 1 + pensionato.step;
+      return 3 + pensionato.step;
     } else {
-      return 1 + dipendente.step;
+      return 3 + dipendente.step;
     }
   }, [userPosition, pensionato.step, dipendente.step]);
 
   const getTotalSteps = useCallback(() => {
-    if (!userPosition) return 1;
-    // Position selection (1) + flow steps
+    if (!userPosition) return 3; // 3 initial steps before position selection
+    // Total steps including the 3 initial ones:
+    // Pensionato: 3 initial + 3 specific (Contact, Type, Entity) = 6 total
+    // Dipendente: 3 initial + 6 specific (Contact, Type, Contract, NumEmp, Date, TFR) = 9 total
     return userPosition === "PENSIONATO" ? 6 : 9;
   }, [userPosition]);
 

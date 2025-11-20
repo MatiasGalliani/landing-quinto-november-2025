@@ -40,9 +40,16 @@ export function SliderInput({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-3 bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-200 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full slider"
           style={{
-            background: `linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) ${percentage}%, rgb(226, 232, 240) ${percentage}%, rgb(226, 232, 240) 100%)`,
+            // @ts-ignore
+            '--slider-progress': `${percentage}%`,
+            background: `linear-gradient(to right, 
+              rgb(59, 130, 246) 0%, 
+              rgb(99, 102, 241) ${percentage}%, 
+              rgb(219, 234, 254) ${percentage}%, 
+              rgb(219, 234, 254) 100%
+            )`,
           }}
         />
         

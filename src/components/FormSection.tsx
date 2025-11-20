@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFormState } from "@/hooks/useFormState";
 import { ProgressBar } from "./form/ProgressBar";
@@ -26,7 +26,17 @@ const formSchema = z.object({
 
 export function FormSection() {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [initialStep, setInitialStep] = useState(1);
+  const [tempAmount, setTempAmount] = useState(25000);
+  const [tempIncome, setTempIncome] = useState(1500);
+  const [tempError, setTempError] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
+
+  // Ensure client-side only rendering for slider styles
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -152,51 +162,77 @@ export function FormSection() {
 
   const handlePositionSelect = useCallback((position: UserPosition) => {
     setUserPosition(position);
-    setPensionato({ ...pensionato, step: 1, error: "" });
-    setDipendente({ ...dipendente, step: 1, error: "" });
+    if (position === "PENSIONATO") {
+      setPensionato({ 
+        ...pensionato, 
+        step: 1,  // Start at step 1 in the flow
+        amount: tempAmount, 
+        pension: tempIncome, 
+        error: "" 
+      });
+    } else {
+      setDipendente({ 
+        ...dipendente, 
+        step: 1,  // Start at step 1 in the flow
+        amount: tempAmount, 
+        salary: tempIncome, 
+        error: "" 
+      });
+    }
     setSubmitError(null);
-  }, [setUserPosition, setPensionato, setDipendente, pensionato, dipendente]);
+  }, [setUserPosition, setPensionato, setDipendente, pensionato, dipendente, tempAmount, tempIncome]);
 
   const handleBack = useCallback(() => {
     if (userPosition) {
-      setUserPosition(null);
-      setShowPersonalInfo(false);
+      if (userPosition === "PENSIONATO" && pensionato.step === 4) {
+        setUserPosition(null);
+        setInitialStep(3);
+      } else if (userPosition === "DIPENDENTE" && dipendente.step === 4) {
+        setUserPosition(null);
+        setInitialStep(3);
+      } else {
+        setUserPosition(null);
+        setShowPersonalInfo(false);
+      }
+    } else if (initialStep > 1) {
+      setInitialStep(initialStep - 1);
+      setTempError("");
     }
-  }, [userPosition, setUserPosition, setShowPersonalInfo]);
+  }, [userPosition, setUserPosition, setShowPersonalInfo, initialStep, pensionato.step, dipendente.step]);
 
   const getHeaderContent = () => {
     if (isLoading || isSubmitted) return null;
     
     if (!userPosition) {
+      // Initial steps before position selection
+      const initialTitles = [
+        "Calcola la Tua Rata Ora",
+        "Qual è il tuo reddito mensile?",
+        "Sei Pensionato o Dipendente?",
+      ];
+      const initialSubtitles = [
+        "Calcola il tuo preventivo in 30 secondi. Zero impegno, 100% online.",
+        "Questo ci aiuta a determinare l'importo massimo finanziabile",
+        "Conferma la tua posizione per continuare con la richiesta",
+      ];
       return {
-        badge: { text: "Risposta rapida garantita", color: "blue" },
-        title: "Inizia la tua richiesta",
-        subtitle: (
-          <>
-            Scegli se sei{" "}
-            <span className="font-semibold text-slate-900">Pensionato</span> o{" "}
-            <span className="font-semibold text-slate-900">Dipendente</span>{" "}
-            per iniziare. Riceverai una risposta in{" "}
-            <span className="font-bold text-blue-600">meno di 2 ore</span>.
-          </>
-        ),
+        badge: initialStep === 1 ? { text: "Calcolo immediato, zero impegno", color: "blue" } : undefined,
+        title: initialTitles[initialStep - 1],
+        subtitle: initialSubtitles[initialStep - 1],
       };
     }
 
     if (userPosition === "PENSIONATO") {
+      // Steps after position selection: 1=Contact, 2=Type, 3=Entity
       const titles = [
-        "Di quanto hai bisogno?",
-        "Qual è la tua pensione mensile?",
+        "Quasi fatto! I tuoi dati di contatto",
         "Tipologia di pensione",
         "Ente pensionistico",
-        "Quasi fatto!",
       ];
       const subtitles = [
-        "Questo ci aiuta a calcolare la rata mensile ottimale per te",
-        "Necessario per determinare l'importo massimo finanziabile",
+        "Per inviarti il preventivo personalizzato",
         "Alcune tipologie hanno condizioni speciali più vantaggiose",
         "Per velocizzare la pratica con il tuo ente",
-        "Clicca per inviare la richiesta e ricevere la tua offerta personalizzata",
       ];
       return {
         title: titles[pensionato.step - 1],
@@ -205,25 +241,22 @@ export function FormSection() {
     }
 
     if (userPosition === "DIPENDENTE") {
+      // Steps after position selection: 1=Contact, 2=Type, 3=Contract, 4=NumEmployees, 5=DateHired, 6=TFR
       const titles = [
-        "Di quanto hai bisogno?",
-        "Qual è il tuo stipendio netto?",
+        "Quasi fatto! I tuoi dati di contatto",
         "Tipo di dipendente",
         "Tipo di contratto",
         "Dimensione dell'azienda",
         "Quando sei stato assunto?",
         "Domanda sul TFR",
-        "Quasi fatto!",
       ];
       const subtitles = [
-        "Questo ci aiuta a calcolare la rata mensile ottimale per te",
-        "Necessario per determinare l'importo massimo finanziabile",
+        "Per inviarti il preventivo personalizzato",
         "Il settore pubblico e privato hanno condizioni diverse",
         "Richiesto per valutare l'idoneità della pratica",
         "Aziende più grandi offrono maggiori garanzie",
         "Per calcolare l'anzianità lavorativa",
         "Il TFR può essere usato come garanzia aggiuntiva",
-        "Clicca per inviare la richiesta e ricevere la tua offerta personalizzata",
       ];
       return {
         title: titles[dipendente.step - 1],
@@ -242,11 +275,11 @@ export function FormSection() {
         
         <CardHeader className="space-y-3 pb-6">
           {/* Progress Bar */}
-          {!isLoading && !isSubmitted && userPosition && (
+          {!isLoading && !isSubmitted && (
             <ProgressBar
-              currentStep={getCurrentStep()}
-              totalSteps={getTotalSteps()}
-              progress={calculateProgress()}
+              currentStep={userPosition ? getCurrentStep() : initialStep}
+              totalSteps={userPosition ? getTotalSteps() : 3}
+              progress={userPosition ? calculateProgress() : Math.round((initialStep / 3) * 100)}
             />
           )}
 
@@ -331,32 +364,157 @@ export function FormSection() {
             </div>
           )}
 
-          {/* Position Selection */}
-          {!showPersonalInfo && !userPosition && (
-            <div className="space-y-3">
-              <Button
-                onClick={() => handlePositionSelect("PENSIONATO")}
-                className="w-full h-16 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative group"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>PENSIONATO</span>
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+          {/* Initial Flow - Steps 1-3 (before position selection) */}
+          {!userPosition && (
+            <>
+              {/* Step 1: Amount */}
+              {initialStep === 1 && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Importo richiesto
+                    </label>
+                    <input
+                      type="range"
+                      min="2000"
+                      max="75000"
+                      step="500"
+                      value={tempAmount}
+                      onChange={(e) => setTempAmount(parseInt(e.target.value))}
+                      className="w-full slider"
+                      style={isMounted ? {
+                        // @ts-ignore
+                        '--slider-progress': `${((tempAmount - 2000) / (75000 - 2000)) * 100}%`,
+                        background: `linear-gradient(to right, 
+                          rgb(59, 130, 246) 0%, 
+                          rgb(99, 102, 241) ${((tempAmount - 2000) / (75000 - 2000)) * 100}%, 
+                          rgb(219, 234, 254) ${((tempAmount - 2000) / (75000 - 2000)) * 100}%, 
+                          rgb(219, 234, 254) 100%
+                        )`
+                      } : undefined}
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                      <span>€2.000</span>
+                      <span className="text-2xl font-bold text-blue-600">€{tempAmount.toLocaleString('it-IT')}</span>
+                      <span>€75.000</span>
+                    </div>
+                  </div>
+                  {tempError && <p className="text-sm text-red-600">{tempError}</p>}
+                  <Button
+                    onClick={() => {
+                      if (!tempAmount || tempAmount <= 0) {
+                        setTempError("Inserisci un importo valido");
+                        return;
+                      }
+                      setTempError("");
+                      setInitialStep(2);
+                    }}
+                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold"
+                  >
+                    Continua
+                  </Button>
                 </div>
-              </Button>
-              <Button
-                onClick={() => handlePositionSelect("DIPENDENTE")}
-                className="w-full h-16 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative group"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>DIPENDENTE</span>
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+              )}
+
+              {/* Step 2: Income */}
+              {initialStep === 2 && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Stipendio / Pensione mensile netta
+                    </label>
+                    <input
+                      type="range"
+                      min="700"
+                      max="7000"
+                      step="50"
+                      value={tempIncome}
+                      onChange={(e) => setTempIncome(parseInt(e.target.value))}
+                      className="w-full slider"
+                      style={isMounted ? {
+                        // @ts-ignore
+                        '--slider-progress': `${((tempIncome - 700) / (7000 - 700)) * 100}%`,
+                        background: `linear-gradient(to right, 
+                          rgb(59, 130, 246) 0%, 
+                          rgb(99, 102, 241) ${((tempIncome - 700) / (7000 - 700)) * 100}%, 
+                          rgb(219, 234, 254) ${((tempIncome - 700) / (7000 - 700)) * 100}%, 
+                          rgb(219, 234, 254) 100%
+                        )`
+                      } : undefined}
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                      <span>€700</span>
+                      <span className="text-2xl font-bold text-blue-600">€{tempIncome.toLocaleString('it-IT')}</span>
+                      <span>€7.000</span>
+                    </div>
+                  </div>
+                  {tempError && <p className="text-sm text-red-600">{tempError}</p>}
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => {
+                        setInitialStep(1);
+                        setTempError("");
+                      }}
+                      variant="outline"
+                      className="flex-1 h-12"
+                    >
+                      Indietro
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (!tempIncome || tempIncome < 660) {
+                          setTempError("L'importo è al di sotto del minimo richiesto");
+                          return;
+                        }
+                        setTempError("");
+                        setInitialStep(3);
+                      }}
+                      className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold"
+                    >
+                      Continua
+                    </Button>
+                  </div>
                 </div>
-              </Button>
-            </div>
+              )}
+
+              {/* Step 3: Position Selection */}
+              {initialStep === 3 && (
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => handlePositionSelect("PENSIONATO")}
+                    className="w-full h-16 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative group"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>PENSIONATO</span>
+                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => handlePositionSelect("DIPENDENTE")}
+                    className="w-full h-16 text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] relative group"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>DIPENDENTE</span>
+                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setInitialStep(2);
+                      setTempError("");
+                    }}
+                    variant="outline"
+                    className="w-full h-12"
+                  >
+                    Indietro
+                  </Button>
+                </div>
+              )}
+            </>
           )}
 
           {/* Pensionato Flow */}

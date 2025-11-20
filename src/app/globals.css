@@ -341,11 +341,21 @@ input[type="range"].slider::-moz-range-thumb:active {
   transform: scale(1.1) translateZ(0);
 }
 
-/* Track */
+/* Track Progress Fill - Dynamic color fill effect */
+input[type="range"].slider {
+  background: linear-gradient(to right, 
+    rgb(59, 130, 246) 0%, 
+    rgb(99, 102, 241) var(--slider-progress, 50%), 
+    rgb(219, 234, 254) var(--slider-progress, 50%), 
+    rgb(219, 234, 254) 100%
+  );
+}
+
 input[type="range"].slider::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 9999px;
   transition: all 0.3s ease;
+  background: transparent;
 }
 
 input[type="range"].slider::-moz-range-track {
