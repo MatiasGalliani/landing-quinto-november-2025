@@ -96,7 +96,7 @@ export function FormSection() {
           userPosition: "DIPENDENTE",
           submittedAt: new Date().toISOString(),
         };
-        endpoint = '/api/dipendente';
+        endpoint = '/api/forms/dipendente';
       } else if (userPosition === "PENSIONATO") {
         // Combine personal info with pensionato data
         payload = {
@@ -116,7 +116,7 @@ export function FormSection() {
           userPosition: "PENSIONATO",
           submittedAt: new Date().toISOString(),
         };
-        endpoint = 'https://accelera-crm-production.up.railway.app/api/forms/quinto-pensionati-leads';
+        endpoint = '/api/forms/quinto-pensionati-leads';
       } else {
         throw new Error('Invalid user position');
       }
